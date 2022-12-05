@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddServices();
+builder.AddServices();
 var app = builder.Build();
 app.ConfigureRequestPipeline();
 app.Run();

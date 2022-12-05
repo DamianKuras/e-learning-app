@@ -13,7 +13,6 @@ namespace Domain.Aggregates.UserProfileAggregate
         }
         public Guid Id { get; private set; }
         public string IdentityId { get; private set; }
-
         public BasicInfo BasicInfo { get; private set; }
         public DateTime Created { get; private set; }
         public DateTime LastUpdated { get; private set; }

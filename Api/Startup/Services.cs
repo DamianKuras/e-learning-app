@@ -1,20 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Api.Options;
+using Microsoft.AspNetCore.Builder;
+using Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Startup
 {
     public static class Services
     {
-        public static IServiceCollection AddServices(this IServiceCollection services)
+        public static WebApplicationBuilder AddServices(this WebApplicationBuilder builder)
         {
-            services.AddControllers();
-            services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
-            services.ConfigureOptions<ConfigureSwaggerOptions>();
-            AddApiVersioning(services);
-            AddVersionedApiExplored(services);
-            return services;
+            builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+            builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
+            AddApiVersioning(builder.Services);
+            AddVersionedApiExplored(builder.Services);
+            AddDatabase(builder);
+            return builder;
         }
         private static void AddApiVersioning(IServiceCollection services)
         {
@@ -34,6 +38,21 @@ namespace Api.Startup
                 config.GroupNameFormat = "'v'VVV";
                 config.SubstituteApiVersionInUrl = true;
             });
+        }
+
+        private static void AddDatabase(WebApplicationBuilder builder)
+        {
+            var connectionString = builder.Configuration.GetConnectionString("Default");
+            builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
+            /*builder.Services.AddIdentityCore<IdentityUser>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 5;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+            })
+                .AddEntityFrameworkStores<DataContext>();*/
         }
 
     }
