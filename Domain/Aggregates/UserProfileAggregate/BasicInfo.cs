@@ -16,8 +16,7 @@ namespace Domain.Aggregates.UserProfileAggregate
         public string EmailAddress { get;private set; }  
 
 
-        public static BasicInfo CreateBasicInfo(string firstName,string lastName, string emailAddress,
-            DateTime dateOfBirth)
+        public static BasicInfo CreateBasicInfo(string firstName,string lastName, string emailAddress)
         {
             BasicInfo basicInfo = new BasicInfo
             {

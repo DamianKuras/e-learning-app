@@ -4,6 +4,13 @@ using Api.Options;
 using Microsoft.AspNetCore.Builder;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Application.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Identity;
+using MediatR;
+using Application.User.CommandsHandlers;
 
 namespace Api.Startup
 {
@@ -15,12 +22,14 @@ namespace Api.Startup
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
-            AddApiVersioning(builder.Services);
-            AddVersionedApiExplored(builder.Services);
-            AddDatabase(builder);
+            builder.Services.AddApiVersioning();
+            builder.Services.AddVersionedApiExplored();
+            builder.Services.AddMediatR(typeof(RegisterUserHandler));
+            builder.Services.AddAutoMapper(typeof(Program),typeof(RegisterUserHandler));
+            builder.AddDatabase();
             return builder;
         }
-        private static void AddApiVersioning(IServiceCollection services)
+        private static void AddApiVersioning(this IServiceCollection services)
         {
             services.AddApiVersioning(config =>
             {
@@ -31,7 +40,7 @@ namespace Api.Startup
             });
         }
 
-        private static void AddVersionedApiExplored(IServiceCollection services)
+        private static void AddVersionedApiExplored(this IServiceCollection services)
         {
             services.AddVersionedApiExplorer(config =>
             {
@@ -40,20 +49,12 @@ namespace Api.Startup
             });
         }
 
-        private static void AddDatabase(WebApplicationBuilder builder)
+        private static void AddDatabase(this WebApplicationBuilder builder)
         {
             var connectionString = builder.Configuration.GetConnectionString("Default");
             builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
-            /*builder.Services.AddIdentityCore<IdentityUser>(options =>
-            {
-                options.Password.RequireDigit = false;
-                options.Password.RequiredLength = 5;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-            })
-                .AddEntityFrameworkStores<DataContext>();*/
+            builder.Services.AddIdentityCore<IdentityUser>()
+                .AddEntityFrameworkStores<DataContext>();
         }
-
     }
 }
