@@ -1,16 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Api.Options;
-using Microsoft.AspNetCore.Builder;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Application.Options;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.AspNetCore.Identity;
 using MediatR;
 using Application.User.CommandsHandlers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Application.Options;
 
 namespace Api.Startup
 {
@@ -27,6 +26,7 @@ namespace Api.Startup
             builder.Services.AddMediatR(typeof(RegisterUserHandler));
             builder.Services.AddAutoMapper(typeof(Program),typeof(RegisterUserHandler));
             builder.AddDatabase();
+            builder.AddIdentity();
             return builder;
         }
         private static void AddApiVersioning(this IServiceCollection services)
@@ -53,8 +53,48 @@ namespace Api.Startup
         {
             var connectionString = builder.Configuration.GetConnectionString("Default");
             builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
-            builder.Services.AddIdentityCore<IdentityUser>()
-                .AddEntityFrameworkStores<DataContext>();
+            builder.Services.AddIdentityCore<IdentityUser>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 5;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+            })
+               .AddEntityFrameworkStores<DataContext>();
+        }
+
+        private static void AddIdentity(this WebApplicationBuilder builder)
+        {
+            var jwtOptions = new JwtOptions();
+            builder.Configuration.Bind(nameof(JwtOptions), jwtOptions);
+            var jwtSection = builder.Configuration.GetSection(nameof(JwtOptions));
+            builder.Services.Configure<JwtOptions>(jwtSection);
+            builder.Services
+                .AddAuthentication(option =>
+                {
+                    option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    option.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+                })
+                .AddJwtBearer(jwt =>
+                {
+                    jwt.SaveToken = true;
+                    jwt.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtOptions.SigningKey)),
+                        ValidateIssuer = true,
+                        ValidIssuer = jwtOptions.Issuer,
+                        ValidateAudience = true,
+                        ValidAudiences = jwtOptions.Audiences,
+                        RequireExpirationTime = false,
+                    };
+                    jwt.Audience = jwtOptions.Audiences.First();
+                    jwt.ClaimsIssuer = jwtOptions.Issuer;
+                });
         }
     }
 }
+
