@@ -15,7 +15,7 @@ namespace Api.Startup
 {
     public static class Services
     {
-        public static void AddServices(this WebApplicationBuilder builder)
+        public static WebApplicationBuilder AddServices(this WebApplicationBuilder builder)
         {
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -27,6 +27,7 @@ namespace Api.Startup
             builder.Services.AddAutoMapper(typeof(Program),typeof(RegisterUserHandler));
             builder.AddDatabase();
             builder.AddIdentity();
+            return builder;
         }
         private static void AddApiVersioning(this IServiceCollection services)
         {
@@ -38,6 +39,7 @@ namespace Api.Startup
                 config.ApiVersionReader = new UrlSegmentApiVersionReader();
             });
         }
+
         private static void AddVersionedApiExplored(this IServiceCollection services)
         {
             services.AddVersionedApiExplorer(config =>
@@ -46,6 +48,7 @@ namespace Api.Startup
                 config.SubstituteApiVersionInUrl = true;
             });
         }
+
         private static void AddDatabase(this WebApplicationBuilder builder)
         {
             var connectionString = builder.Configuration.GetConnectionString("Default");
@@ -60,6 +63,7 @@ namespace Api.Startup
             })
                .AddEntityFrameworkStores<DataContext>();
         }
+
         private static void AddIdentity(this WebApplicationBuilder builder)
         {
             var jwtOptions = new JwtOptions();

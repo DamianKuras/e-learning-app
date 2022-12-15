@@ -1,20 +1,20 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
 namespace Api.Startup
 {
     public static class RequestPipeline
     {
-        public static void ConfigureRequestPipeline(this WebApplication app)
+        public static WebApplication ConfigureRequestPipeline(this WebApplication app)
         {
-            app.ConfigureSwagger();
-            app.ConfigureGlobalExceptionHandler();
+            ConfigureSwagger(app);
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
+            return app;
         }
-        private static void ConfigureSwagger(this WebApplication app)
+
+
+        private static WebApplication ConfigureSwagger(WebApplication app)
         {
             if (app.Environment.IsDevelopment())
             {
@@ -29,19 +29,7 @@ namespace Api.Startup
                     }
                 });
             }
-        }
-        private static void ConfigureGlobalExceptionHandler(this WebApplication app)
-        {
-            app.UseExceptionHandler(exceptionHandlerApp =>
-            {
-                exceptionHandlerApp.Run(async context =>
-                {
-                    context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                    context.Response.ContentType = "aplication/json";
-                    await context.Response.WriteAsJsonAsync("Something went wrong. Please try again latter");
-                });
-
-            });
+            return app;
         }
     }
 }
