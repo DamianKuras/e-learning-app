@@ -48,7 +48,6 @@ namespace Api.Controllers.v1
         {
             var command = _mapper.Map<LoginUser>(login);
             var result = await _mediator.Send(command);
-            throw new Exception("unhandled");
             if (result.IsError)
             {
                 if(result.ErrorType == ErrorType.Unauthorized)
