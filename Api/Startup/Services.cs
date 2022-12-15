@@ -15,7 +15,7 @@ namespace Api.Startup
 {
     public static class Services
     {
-        public static WebApplicationBuilder AddServices(this WebApplicationBuilder builder)
+        public static void AddServices(this WebApplicationBuilder builder)
         {
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -27,7 +27,6 @@ namespace Api.Startup
             builder.Services.AddAutoMapper(typeof(Program),typeof(RegisterUserHandler));
             builder.AddDatabase();
             builder.AddIdentity();
-            return builder;
         }
         private static void AddApiVersioning(this IServiceCollection services)
         {
