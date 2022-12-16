@@ -9,6 +9,7 @@ namespace Api.Options
     public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
     {
         private readonly IApiVersionDescriptionProvider _provider;
+
         public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider)
         {
             _provider = provider;
@@ -41,6 +42,7 @@ namespace Api.Options
             }
             return info;
         }
+
         private OpenApiSecurityScheme GetJwtSecurityScheme()
         {
             return new OpenApiSecurityScheme
@@ -60,4 +62,3 @@ namespace Api.Options
         }
     }
 }
-

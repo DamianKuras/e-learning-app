@@ -13,6 +13,5 @@ namespace Api.MappingProfiles
             CreateMap<Login, LoginUser>();
             CreateMap<LogedInUserDto, User>();
         }
-       
     }
 }

@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc.Versioning;
-using Microsoft.AspNetCore.Mvc;
-using Api.Options;
-using Infrastructure;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using MediatR;
+﻿using Api.Options;
+using Application.Options;
 using Application.User.CommandsHandlers;
+using Infrastructure;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Application.Options;
 
 namespace Api.Startup
 {
@@ -24,10 +24,11 @@ namespace Api.Startup
             builder.Services.AddApiVersioning();
             builder.Services.AddVersionedApiExplored();
             builder.Services.AddMediatR(typeof(RegisterUserHandler));
-            builder.Services.AddAutoMapper(typeof(Program),typeof(RegisterUserHandler));
+            builder.Services.AddAutoMapper(typeof(Program), typeof(RegisterUserHandler));
             builder.AddDatabase();
             builder.AddIdentity();
         }
+
         private static void AddApiVersioning(this IServiceCollection services)
         {
             services.AddApiVersioning(config =>
@@ -36,15 +37,6 @@ namespace Api.Startup
                 config.AssumeDefaultVersionWhenUnspecified = true;
                 config.ReportApiVersions = true;
                 config.ApiVersionReader = new UrlSegmentApiVersionReader();
-            });
-        }
-
-        private static void AddVersionedApiExplored(this IServiceCollection services)
-        {
-            services.AddVersionedApiExplorer(config =>
-            {
-                config.GroupNameFormat = "'v'VVV";
-                config.SubstituteApiVersionInUrl = true;
             });
         }
 
@@ -69,13 +61,11 @@ namespace Api.Startup
             builder.Configuration.Bind(nameof(JwtOptions), jwtOptions);
             var jwtSection = builder.Configuration.GetSection(nameof(JwtOptions));
             builder.Services.Configure<JwtOptions>(jwtSection);
-            builder.Services
-                .AddAuthentication(option =>
+            builder.Services.AddAuthentication(option =>
                 {
                     option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     option.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                     option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
                 })
                 .AddJwtBearer(jwt =>
                 {
@@ -94,6 +84,14 @@ namespace Api.Startup
                     jwt.ClaimsIssuer = jwtOptions.Issuer;
                 });
         }
+
+        private static void AddVersionedApiExplored(this IServiceCollection services)
+        {
+            services.AddVersionedApiExplorer(config =>
+            {
+                config.GroupNameFormat = "'v'VVV";
+                config.SubstituteApiVersionInUrl = true;
+            });
+        }
     }
 }
-

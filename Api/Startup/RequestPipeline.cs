@@ -13,6 +13,20 @@ namespace Api.Startup
             app.MapControllers();
             return app;
         }
+
+        private static void ConfigureGlobalExceptionHandler(this WebApplication app)
+        {
+            app.UseExceptionHandler(exceptionHandlerApp =>
+            {
+                exceptionHandlerApp.Run(async context =>
+                {
+                    context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                    context.Response.ContentType = "aplication/json";
+                    await context.Response.WriteAsJsonAsync("Something went wrong. Please try again latter");
+                });
+            });
+        }
+
         private static void ConfigureSwagger(this WebApplication app)
         {
             if (app.Environment.IsDevelopment())
@@ -28,19 +42,6 @@ namespace Api.Startup
                     }
                 });
             }
-        }
-        private static void ConfigureGlobalExceptionHandler(this WebApplication app)
-        {
-            app.UseExceptionHandler(exceptionHandlerApp =>
-            {
-                exceptionHandlerApp.Run(async context =>
-                {
-                    context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                    context.Response.ContentType = "aplication/json";
-                    await context.Response.WriteAsJsonAsync("Something went wrong. Please try again latter");
-                });
-
-            });
         }
     }
 }
