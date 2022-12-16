@@ -23,10 +23,9 @@ namespace Api.Options
             }
             var scheme = GetJwtSecurityScheme();
             options.AddSecurityDefinition(scheme.Reference.Id, scheme);
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {scheme, new string[0]}
-            });
+            options.AddSecurityRequirement(
+                new OpenApiSecurityRequirement { { scheme, new string[0] } }
+            );
         }
 
         private OpenApiInfo CreateVersionInfo(ApiVersionDescription description)

@@ -46,7 +46,7 @@ namespace Application.User.CommandsHandlers
             var user = await getUser(request);
             if (_result.IsError)
                 return _result;
-            var userProfile = await _context.userProfiles.FirstOrDefaultAsync(
+            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(
                 p => p.IdentityId == user.Id,
                 cancellationToken
             );

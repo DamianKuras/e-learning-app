@@ -87,7 +87,7 @@ namespace Application.User.CommandsHandlers
                     request.Email
                 );
                 var profile = UserProfile.CreateUserProfile(identityUser.Id, profileBasicInfo);
-                await _context.userProfiles.AddAsync(profile);
+                await _context.UserProfiles.AddAsync(profile);
                 await _context.SaveChangesAsync(cancellationToken);
             }
             catch

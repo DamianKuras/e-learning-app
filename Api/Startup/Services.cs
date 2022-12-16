@@ -43,16 +43,19 @@ namespace Api.Startup
         private static void AddDatabase(this WebApplicationBuilder builder)
         {
             var connectionString = builder.Configuration.GetConnectionString("Default");
-            builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
-            builder.Services.AddIdentityCore<IdentityUser>(options =>
-            {
-                options.Password.RequireDigit = false;
-                options.Password.RequiredLength = 5;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-            })
-               .AddEntityFrameworkStores<DataContext>();
+            builder.Services.AddDbContext<DataContext>(
+                options => options.UseSqlServer(connectionString)
+            );
+            builder.Services
+                .AddIdentityCore<IdentityUser>(options =>
+                {
+                    options.Password.RequireDigit = false;
+                    options.Password.RequiredLength = 5;
+                    options.Password.RequireLowercase = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequireNonAlphanumeric = false;
+                })
+                .AddEntityFrameworkStores<DataContext>();
         }
 
         private static void AddIdentity(this WebApplicationBuilder builder)
@@ -61,7 +64,8 @@ namespace Api.Startup
             builder.Configuration.Bind(nameof(JwtOptions), jwtOptions);
             var jwtSection = builder.Configuration.GetSection(nameof(JwtOptions));
             builder.Services.Configure<JwtOptions>(jwtSection);
-            builder.Services.AddAuthentication(option =>
+            builder.Services
+                .AddAuthentication(option =>
                 {
                     option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     option.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -73,7 +77,9 @@ namespace Api.Startup
                     jwt.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtOptions.SigningKey)),
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.ASCII.GetBytes(jwtOptions.SigningKey)
+                        ),
                         ValidateIssuer = true,
                         ValidIssuer = jwtOptions.Issuer,
                         ValidateAudience = true,

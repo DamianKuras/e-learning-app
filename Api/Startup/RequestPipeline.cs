@@ -22,7 +22,9 @@ namespace Api.Startup
                 {
                     context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                     context.Response.ContentType = "aplication/json";
-                    await context.Response.WriteAsJsonAsync("Something went wrong. Please try again latter");
+                    await context.Response.WriteAsJsonAsync(
+                        "Something went wrong. Please try again latter"
+                    );
                 });
             });
         }
@@ -34,11 +36,14 @@ namespace Api.Startup
                 app.UseSwagger();
                 app.UseSwaggerUI(options =>
                 {
-                    var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+                    var provider =
+                        app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
                     foreach (var description in provider.ApiVersionDescriptions)
                     {
-                        options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
-                            description.ApiVersion.ToString());
+                        options.SwaggerEndpoint(
+                            $"/swagger/{description.GroupName}/swagger.json",
+                            description.ApiVersion.ToString()
+                        );
                     }
                 });
             }
