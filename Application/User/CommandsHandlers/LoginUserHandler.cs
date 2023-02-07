@@ -1,5 +1,5 @@
 ﻿using Application.Dto;
-using Application.Models;
+using Application.Models.Result;
 using Application.Options;
 using Application.User.Commands;
 using AutoMapper;
@@ -43,8 +43,8 @@ namespace Application.User.CommandsHandlers
             CancellationToken cancellationToken
         )
         {
-            var user = await getUser(request);
-            if (_result.IsError)
+            var user = await ValidateAndGetUser(request);
+            if (_result.IsUnauthorized)
                 return _result;
             var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(
                 p => p.IdentityId == user.Id,
@@ -87,21 +87,21 @@ namespace Application.User.CommandsHandlers
             };
         }
 
-        private async Task<IdentityUser> getUser(LoginUser request)
+        private async Task<IdentityUser> ValidateAndGetUser(LoginUser request)
         {
             var user = await _userManager.FindByNameAsync(request.Username);
             if (user == null)
             {
-                _result.IsError = true;
-                _result.ErrorType = Enums.ErrorType.Unauthorized;
+                _result.SetAsUnauthorized();
                 _result.Errors.Add("Username or password is incorrect.");
+                return user;
             }
             var validPassword = await _userManager.CheckPasswordAsync(user, request.Password);
             if (!validPassword)
             {
-                _result.IsError = true;
-                _result.ErrorType = Enums.ErrorType.Unauthorized;
+                _result.SetAsUnauthorized();
                 _result.Errors.Add("Username or password is incorrect.");
+                return user;
             }
             return user;
         }

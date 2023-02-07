@@ -1,5 +1,5 @@
 ﻿using Application.Dto;
-using Application.Models;
+using Application.Models.Result;
 using MediatR;
 
 namespace Application.User.Commands

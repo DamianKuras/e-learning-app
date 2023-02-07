@@ -1,5 +1,4 @@
-﻿using Application.Enums;
-using Application.Models;
+﻿using Application.Models.Result;
 using Application.User.Commands;
 using Domain.Aggregates.UserProfileAggregate;
 using Infrastructure;
@@ -26,30 +25,28 @@ namespace Application.User.CommandsHandlers
             CancellationToken cancellationToken
         )
         {
-            await validateUserName(request.Username);
-            if (_result.IsError)
-                return _result;
-            await validateEmail(request.Email);
-            if (_result.IsError)
+            await ValidateUserNameUniqueness(request.Username);
+            await ValidateEmailUniqueness(request.Email);
+            if (_result.IsInvalid)
                 return _result;
 
             await using var transaction = await _context.Database.BeginTransactionAsync(
                 cancellationToken
             );
 
-            var identity = await CreateIdentityUserAsync(request, transaction, cancellationToken);
-            if (_result.IsError)
+            var identity = await CreateIdentityUser(request, transaction, cancellationToken);
+            if (_result.IsInvalid)
                 return _result;
 
             await CreateUserProfile(request, transaction, identity, cancellationToken);
-            if (_result.IsError)
+            if (_result.IsInvalid)
                 return _result;
 
             await transaction.CommitAsync();
             return _result;
         }
 
-        private async Task<IdentityUser> CreateIdentityUserAsync(
+        private async Task<IdentityUser> CreateIdentityUser(
             RegisterUser request,
             IDbContextTransaction transaction,
             CancellationToken cancellationToken
@@ -61,11 +58,9 @@ namespace Application.User.CommandsHandlers
             if (!identityUser.Succeeded)
             {
                 await transaction.RollbackAsync(cancellationToken);
-                _result.IsError = true;
+                _result.SetAsInvalid();
                 foreach (var identityError in identityUser.Errors)
                 {
-                    _result.IsError = true;
-                    _result.ErrorType = ErrorType.BadRequest;
                     _result.Errors.Add(identityError.Description);
                 }
             }
@@ -93,32 +88,29 @@ namespace Application.User.CommandsHandlers
             catch
             {
                 await transaction.RollbackAsync(cancellationToken);
-                _result.IsError = true;
-                _result.ErrorType = ErrorType.InternalServerError;
-                _result.Errors.Add("Internal server error please try again latter");
+                throw;
             }
         }
 
-        private async Task validateEmail(string Email)
+        private async Task ValidateEmailUniqueness(string Email)
         {
             var existingUserWithEmail = await _userManager.FindByEmailAsync(Email);
             if (existingUserWithEmail != null)
             {
-                _result.IsError = true;
-                _result.ErrorType = ErrorType.BadRequest;
+                _result.SetAsInvalid();
                 _result.Errors.Add(
-                    "Email address is already associated with an account. You can only have one account per email address."
+                    "Email address is already associated with an account. " +
+                    "You can only have one account per email address."
                 );
             }
         }
 
-        private async Task validateUserName(string Username)
+        private async Task ValidateUserNameUniqueness(string Username)
         {
             var existingUserWithUsername = await _userManager.FindByNameAsync(Username);
             if (existingUserWithUsername != null)
             {
-                _result.IsError = true;
-                _result.ErrorType = ErrorType.BadRequest;
+                _result.SetAsInvalid();
                 _result.Errors.Add("Username needs to be unique");
             }
         }
